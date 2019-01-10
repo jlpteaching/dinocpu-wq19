@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Copy the files from /autograder/submission to the proper location
+cp -r /autograder/submission/src /codcpu
+
+# change directory to the main codcpu directory
+cd /codcpu
+
+# Run the test. This should generate the json file in /autograder/results
+sbt "Grader / test"
+
+# Remove all of the colors from the json
+cd /autograder/results
+cat results.json | perl -pe 's/\e\[?.*?[\@-~]//g' > tmp.json
+mv tmp.json results.json
