@@ -40,8 +40,8 @@ class Control extends Module {
     ListLookup(io.opcode,
       /*default*/           List(false.B, false.B, 3.U,   false.B, false.B,  false.B, false.B,    0.U,    0.U),
       Array(                 /*  branch,  memread, toreg, add,     memwrite, immediate, regwrite, alusrc1,  jump */
-      // Invalid
-      BitPat("b0000000") -> List(false.B, false.B, 0.U,   false.B, false.B,  false.B, false.B,     0.U,    0.U)
+      // R-format
+      BitPat("b0110011") -> List(false.B, false.B, 0.U,   false.B, false.B,  false.B, true.B,     0.U,    0.U),
       ) // Array
     ) // ListLookup
 

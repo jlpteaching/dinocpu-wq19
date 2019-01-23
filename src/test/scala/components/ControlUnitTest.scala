@@ -1,4 +1,4 @@
-// Unit tests for the ALU control logic
+// Unit tests for the main control logic
 
 package dinocpu
 
@@ -11,11 +11,10 @@ class ControlUnitTester(c: Control) extends PeekPokeTester(c) {
   private val ctl = c
 
   val tests = List(
-    // Inputs,       imm,      toreg, regwrite, memread, memwrite, branch, add
-    ( "b0110011".U,    0,        0,       1,        0,       0,        0,     0), // R-type
-    ( "b0000011".U,    1,        1,       1,        1,       0,        0,     1), // Load
-    ( "b0100011".U,    1,        0,       0,        0,       1,        0,     1), // Store
-    ( "b1100011".U,    0,        0,       0,        0,       0,        1,     0)  // beq
+    // Inputs,       imm,      toreg, regwrite, memread, memwrite, branch, add,      alusrc1, jump 
+    ( "b0110011".U,    0,        0,       1,        0,       0,        0,     0,	0,	0) // R-type
+
+
   )
 
   for (t <- tests) {
@@ -28,6 +27,8 @@ class ControlUnitTester(c: Control) extends PeekPokeTester(c) {
     expect(ctl.io.memwrite, t._6)
     expect(ctl.io.immediate, t._2)
     expect(ctl.io.regwrite, t._4)
+    expect(ctl.io.alusrc1,t._9)
+    expect(ctl.io.jump,t._10)
   }
 }
 
