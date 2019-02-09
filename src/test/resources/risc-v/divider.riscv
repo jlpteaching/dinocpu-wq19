@@ -10,7 +10,7 @@ add	a5,zero,t1
 sw	a5,0x600(zero)
 lw	a5,0x550(zero)
 sw	a5,0x400(zero)
-add	a5,zero,-1
+addi	a5,zero,-1
 sw	a5,0x450(zero)
 sw	zero,0x500(zero)
 jal	label2

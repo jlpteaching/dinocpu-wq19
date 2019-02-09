@@ -36,4 +36,13 @@ class RegisterFile(implicit val conf: CPUConfig) extends Module {
   // might both read and write the registers (e.g., an add)
   io.readdata1 := regs(io.readreg1)
   io.readdata2 := regs(io.readreg2)
+
+  if (conf.cpuType != "single-cycle") {
+    // For the five-cycle and pipelined CPU forward the data through the register file
+    when (io.readreg1 === io.writereg && io.wen) {
+      io.readdata1 := io.writedata
+    } .elsewhen (io.readreg2 === io.writereg && io.wen) {
+      io.readdata2 := io.writedata
+    }
+  }
 }
