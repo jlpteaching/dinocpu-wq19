@@ -50,14 +50,14 @@ class PipelinedCPU(implicit val conf: CPUConfig) extends Module {
     val wbcontrol = new WBControl
   }
 
-  // Everything in the register between ID and EX stages
+  // Everything in the register between EX and MEM stages
   class EXMEMBundle extends Bundle {
 
     val mcontrol  = new MControl
     val wbcontrol = new WBControl
   }
 
-  // Everything in the register between ID and EX stages
+  // Everything in the register between MEM and WB stages
   class MEMWBBundle extends Bundle {
 
     val wbcontrol = new WBControl
