@@ -16,8 +16,18 @@ class CPUConfig
   /** The type of CPU to elaborate */
   var cpuType = "single-cycle"
 
+  /** The type of branch predictor to use */
+  var branchPredictor = "always-not-taken"
+  /** Number of bits for the saturating counters */
+  var saturatingCounterBits = 4
+  /** Number of entries in the branch predictor table */
+  var branchPredTableEntries = 32
+
   /** The memory file location */
   var memFile = "test"
+
+  /** For debugging output */
+  var debug = false
 
   /**
    * Returns the CPU that we will be elaborating
@@ -28,8 +38,20 @@ class CPUConfig
     implicit val conf = this
     cpuType match {
       case "single-cycle" => new SingleCycleCPU
+      case "five-cycle" => new FiveCycleCPU
       case "pipelined" => new PipelinedCPU
       case _ => throw new IllegalArgumentException("Must specify known CPU model")
+    }
+  }
+
+  def getBranchPredictor = {
+    implicit val conf = this
+    branchPredictor match {
+      case "always-taken"     => new AlwaysTakenPredictor
+      case "always-not-taken" => new AlwaysNotTakenPredictor
+      case "local"            => new LocalPredictor
+      case "global"           => new GlobalHistoryPredictor
+      case _ => throw new IllegalArgumentException("Must specify known branch predictor")
     }
   }
 
@@ -40,11 +62,11 @@ class CPUConfig
    *        smaller than this, create a memory that is this size.
    * @return [[dinocpu.DualPortedMemory]] object
    */
-  def getMem(minSize: Int = 4096) = {
+  def getMem(minSize: Int = 1 << 16) = {
     val f = new File(memFile)
     if (f.length == 0) {
       println("WARNING: No file will be loaded for data memory")
     }
-    new DualPortedMemory(max(f.length.toInt, minSize), memFile)
+    new DualPortedMemory(minSize, memFile)
   }
 }

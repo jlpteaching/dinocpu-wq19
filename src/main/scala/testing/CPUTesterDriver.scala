@@ -7,7 +7,7 @@ import treadle.executable.TreadleException
 
 class CPUFlatSpec extends FlatSpec with Matchers
 
-class CPUTesterDriver(cpuType: String, binary: String, extraName: String = "") {
+class CPUTesterDriver(cpuType: String, branchPredictor: String, binary: String, extraName: String = "") {
   val optionsManager = new SimulatorOptionsManager()
 
   if (optionsManager.targetDirName == ".") {
@@ -19,13 +19,31 @@ class CPUTesterDriver(cpuType: String, binary: String, extraName: String = "") {
   val conf = new CPUConfig()
   conf.cpuType = cpuType
   conf.memFile = hexName
+  conf.debug = true // always run with debug print statements
+
+  if (!branchPredictor.isEmpty) {
+    conf.branchPredictor = branchPredictor
+  }
+
+  // Convert the binary to a hex file that can be loaded by treadle
+  // (Do this after compiling the firrtl so the directory is created)
+  val path = if (binary.endsWith(".riscv")) {
+    s"src/test/resources/c/${binary}"
+  } else {
+    s"src/test/resources/risc-v/${binary}"
+  }
+
+  if (path.endsWith(".riscv")) {
+    // This is a long test, suppress the debugging output
+    println("WARNING: Suppressing debug output for long test.")
+    println("Modify CPUTesterDriver or use singlestep for debugging ouput.")
+    conf.debug = false
+  }
 
   // This compiles the chisel to firrtl
   val compiledFirrtl = build(optionsManager, conf)
 
-  // Convert the binary to a hex file that can be loaded by treadle
-  // (Do this after compiling the firrtl so the directory is created)
-  val endPC = elfToHex(s"src/test/resources/risc-v/${binary}", hexName)
+  val endPC = elfToHex(path, hexName)
 
   // Instantiate the simulator
   val simulator = TreadleTester(compiledFirrtl, optionsManager)
@@ -86,7 +104,7 @@ class CPUTesterDriver(cpuType: String, binary: String, extraName: String = "") {
 
   def step(cycles: Int = 0): Unit = {
     val start = cycle
-    while (cycle < start + cycles) {
+    while (simulator.peek("cpu.pc") != endPC && cycle < start + cycles) {
       simulator.step(1)
       cycle += 1
     }
@@ -116,8 +134,8 @@ case class CPUTestCase(
 }
 
 object CPUTesterDriver {
-  def apply(testCase: CPUTestCase, cpuType: String): Boolean = {
-    val driver = new CPUTesterDriver(cpuType, testCase.binary, testCase.extraName)
+  def apply(testCase: CPUTestCase, cpuType: String, branchPredictor: String = ""): Boolean = {
+    val driver = new CPUTesterDriver(cpuType, branchPredictor, testCase.binary, testCase.extraName)
     driver.initRegs(testCase.initRegs)
     driver.initMemory(testCase.initMem)
     driver.run(testCase.cycles(cpuType))

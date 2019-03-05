@@ -60,9 +60,14 @@ class DualPortedMemory(size: Int, memfile: String) extends Module {
   val memory = Mem(math.ceil(size.toDouble/4).toInt, UInt(32.W))
   loadMemoryFromFile(memory, memfile)
 
-  io.imem.instruction := memory(io.imem.address >> 2)
+  when (io.imem.address >= size.U) {
+    io.imem.instruction := 0.U
+  } .otherwise {
+    io.imem.instruction := memory(io.imem.address >> 2)
+  }
 
   when (io.dmem.memread) {
+    assert(io.dmem.address < size.U)
     val readdata = Wire(UInt(32.W))
 
     when (io.dmem.maskmode =/= 2.U) { // When not loading a whole word
@@ -80,8 +85,10 @@ class DualPortedMemory(size: Int, memfile: String) extends Module {
     when (io.dmem.sext) {
       when (io.dmem.maskmode === 0.U) {
         io.dmem.readdata := Cat(Fill(24, readdata(7)), readdata(7,0))
-      } .otherwise {
+      } .elsewhen(io.dmem.maskmode === 1.U) {
         io.dmem.readdata := Cat(Fill(16, readdata(15)), readdata(15,0))
+      } .otherwise {
+        io.dmem.readdata := readdata
       }
     } .otherwise {
       io.dmem.readdata := readdata
@@ -89,6 +96,7 @@ class DualPortedMemory(size: Int, memfile: String) extends Module {
   }
 
   when (io.dmem.memwrite) {
+    assert(io.dmem.address < size.U)
     when (io.dmem.maskmode =/= 2.U) { // When not storing a whole word
       val offset = io.dmem.address(1,0)
       // first read the data since we are only overwriting part of it

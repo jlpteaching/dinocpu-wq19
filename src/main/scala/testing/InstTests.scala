@@ -216,7 +216,7 @@ object InstTests {
 								Map(5 -> 1235, 6 -> 1, 7 -> 5678, 28 -> 5678),
 								Map(), Map(), "-True"),
 		CPUTestCase("bne",
-                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 7),
+                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 9),
                 Map(5 -> 1234, 6 -> 1, 7 -> 5678, 28 -> 5678),
 								Map(5 -> 0, 6 -> 1, 7 -> 5678, 28 -> 5678),
 								Map(), Map(), "-False"),
@@ -226,12 +226,12 @@ object InstTests {
 								Map(5 -> 1235, 6 -> 1, 7 -> 5678, 28 -> 9012),
 								Map(), Map(), "-True"),
 		CPUTestCase("blt",
-                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 7),
+                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 9),
                 Map(5 -> 1234, 6 -> 1, 7 -> 9012, 28 -> 5678),
 								Map(5 -> 0, 6 -> 1, 7 -> 9012, 28 -> 5678),
 								Map(), Map(), "-False"),
 		CPUTestCase("blt",
-                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 7),
+                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 9),
                 Map(5 -> 1234, 6 -> 1, 7 -> 5678, 28 -> 5678),
 								Map(5 -> 0, 6 -> 1, 7 -> 5678, 28 -> 5678),
 								Map(), Map(), "-False-equal"),
@@ -241,7 +241,7 @@ object InstTests {
 								Map(5 -> 1235, 6 -> 1, 7 -> 5678, 28 -> 9012),
 								Map(), Map(), "-True"),
 		CPUTestCase("blt",
-                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 7),
+                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 9),
                 Map(5 -> 1234, 6 -> 1, 7 -> 9012, 28 -> twoscomp(-1)),
 								Map(5 -> 0, 6 -> 1, 7 -> 9012, 28 -> twoscomp(-1)),
 								Map(), Map(), "-False-signed"),
@@ -251,7 +251,7 @@ object InstTests {
 								Map(5 -> 1235, 6 -> 1, 7 -> twoscomp(-10000), 28 -> twoscomp(-1000)),
 								Map(), Map(), "-True-signed"),
 		CPUTestCase("bge",
-                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 7),
+                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 9),
                 Map(5 -> 1234, 6 -> 1, 7 -> 5678, 28 -> 9012),
 								Map(5 -> 0, 6 -> 1, 7 -> 5678, 28 -> 9012),
 								Map(), Map(), "-False"),
@@ -261,7 +261,7 @@ object InstTests {
 								Map(5 -> 1235, 6 -> 1, 7 -> 9012, 28 -> 5678),
 								Map(), Map(), "-True"),
 		CPUTestCase("bge",
-                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 7),
+                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 9),
                 Map(5 -> 1234, 6 -> 1, 7 -> twoscomp(-1), 28 -> 9012),
 								Map(5 -> 0, 6 -> 1, 7 -> twoscomp(-1), 28 -> 9012),
 								Map(), Map(), "-False-signed"),
@@ -276,7 +276,7 @@ object InstTests {
 								Map(5 -> 1235, 6 -> 1, 7 -> 5678, 28 -> 5678),
 								Map(), Map(), "-True-equal"),
 		CPUTestCase("bltu",
-                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 7),
+                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 9),
                 Map(5 -> 1234, 6 -> 1, 7 -> maxInt, 28 -> 5678),
 								Map(5 -> 0, 6 -> 1, 7 -> maxInt, 28 -> 5678),
 								Map(), Map(), "-False"),
@@ -286,7 +286,7 @@ object InstTests {
 								Map(5 -> 1235, 6 -> 1, 7 -> 5678, 28 -> maxInt),
 								Map(), Map(), "-True"),
 		CPUTestCase("bgeu",
-                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 7),
+                Map("single-cycle" -> 3, "five-cycle" -> 7, "pipelined" -> 9),
                 Map(5 -> 1234, 6 -> 1, 7 -> 5678, 28 -> maxInt),
 								Map(5 -> 0, 6 -> 1, 7 -> 5678, 28 -> maxInt),
 								Map(), Map(), "-False"),
@@ -409,7 +409,7 @@ object InstTests {
 								Map(), Map())
   )
 
-	val applications = List[CPUTestCase](
+	val smallApplications = List[CPUTestCase](
 		CPUTestCase("fibonacci",
               	Map("single-cycle" -> 300, "five-cycle" -> 0, "pipelined" -> 1000),
               	Map(6->11),
@@ -421,14 +421,47 @@ object InstTests {
 								Map(5->55),
 								Map(), Map()),
     CPUTestCase("multiplier",
-          	Map("single-cycle" -> 1000, "five-cycle" -> 0, "pipelined" -> 1000),
-        	Map(5->23,6->20),
+								Map("single-cycle" -> 1000, "five-cycle" -> 0, "pipelined" -> 1000),
+								Map(5->23,6->20,8->0x1000),
 								Map(5->23*20),
 								Map(), Map()),
     CPUTestCase("divider",
                 Map("single-cycle" -> 1000, "five-cycle" -> 0, "pipelined" -> 2000),
                 Map(5->1260,6->30),
 								Map(7->42),
+								Map(), Map())
+	)
+
+	val fullApplications =  List[CPUTestCase](
+		CPUTestCase("multiply.riscv",
+								Map("single-cycle" -> 42342, "five-cycle" -> 0, "pipelined" -> 100000),
+								Map(),
+								Map(10->12345678),
+								Map(), Map()),
+		CPUTestCase("median.riscv",
+								Map("single-cycle" -> 9433, "five-cycle" -> 0, "pipelined" -> 100000),
+								Map(),
+								Map(10->12345678),
+								Map(), Map()),
+		CPUTestCase("qsort.riscv",
+								Map("single-cycle" -> 263290, "five-cycle" -> 0, "pipelined" -> 300000),
+								Map(),
+								Map(10->12345678),
+								Map(), Map()),
+		CPUTestCase("rsort.riscv",
+								Map("single-cycle" -> 263290, "five-cycle" -> 0, "pipelined" -> 250000),
+								Map(),
+								Map(10->12345678),
+								Map(), Map()),
+		CPUTestCase("towers.riscv",
+								Map("single-cycle" -> 12653, "five-cycle" -> 0, "pipelined" -> 100000),
+								Map(),
+								Map(10->12345678),
+								Map(), Map()),
+		CPUTestCase("vvadd.riscv",
+								Map("single-cycle" -> 5484, "five-cycle" -> 0, "pipelined" -> 20000),
+								Map(),
+								Map(10->12345678),
 								Map(), Map())
 	)
 
@@ -443,12 +476,13 @@ object InstTests {
 		"memoryMultiCycle" -> memoryMultiCycle,
     "utype" -> utype,
     "jump" -> jump,
-		"applications" -> applications
+		"smallApplications" -> smallApplications
   )
 
 	// All of the tests
-	val allTests = rtype ++ rtypeMultiCycle ++ itype ++ itypeMultiCycle ++ branch ++ memory ++ memoryMultiCycle ++ utype ++ jump ++ applications
+	val allTests = rtype ++ rtypeMultiCycle ++ itype ++ itypeMultiCycle ++ branch ++
+								 memory ++ memoryMultiCycle ++ utype ++ jump ++ smallApplications
 
 	// Mapping from full name of test to test
-	val nameMap = allTests.map(x => x.name() -> x).toMap
+	val nameMap = (allTests ++ fullApplications).map(x => x.name() -> x).toMap
 }

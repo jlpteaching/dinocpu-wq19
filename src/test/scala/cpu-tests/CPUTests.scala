@@ -31,6 +31,18 @@ class SingleCycleCPUTester extends CPUFlatSpec {
   }
 }
 
+/** Just like [[SingleCycleCPUTester]], but for the five cycle CPU */
+class FiveCycleCPUTester extends CPUFlatSpec {
+  behavior of "Five Cycle CPU"
+  for ((group, tests) <- InstTests.tests) {
+    for (test <- tests if test.cycles("five-cycle") > 0) {
+      it should s"run $group ${test.binary}${test.extraName}" in {
+        CPUTesterDriver(test, "five-cycle") should be(true)
+      }
+    }
+  }
+}
+
 /** Just like [[SingleCycleCPUTester]], but for the pipelined CPU */
 class PipelinedCPUTester extends CPUFlatSpec {
   behavior of "Pipelined CPU"
@@ -39,6 +51,66 @@ class PipelinedCPUTester extends CPUFlatSpec {
       it should s"run $group ${test.binary}${test.extraName}" in {
         CPUTesterDriver(test, "pipelined") should be(true)
       }
+    }
+  }
+}
+
+/** Just like [[SingleCycleCPUTester]], but for the pipelined CPU */
+class PipelinedBPTakenCPUTester extends CPUFlatSpec {
+  val mytests = Map(
+    "branch" -> InstTests.branch,
+    "jump" -> InstTests.jump,
+		"applications" -> InstTests.smallApplications
+  )
+  behavior of "Pipelined CPU with always-taken branch predictor"
+  for ((group, tests) <- mytests) {
+    for (test <- tests) {
+      it should s"run $group ${test.binary}${test.extraName}" in {
+        CPUTesterDriver(test, "pipelined", "always-taken") should be(true)
+      }
+    }
+  }
+}
+
+/** Just like [[SingleCycleCPUTester]], but for the pipelined CPU */
+class PipelinedBPLocalCPUTester extends CPUFlatSpec {
+  val mytests = Map(
+    "branch" -> InstTests.branch,
+    "jump" -> InstTests.jump,
+		"applications" -> InstTests.smallApplications
+  )
+  behavior of "Pipelined CPU with local branch predictor"
+  for ((group, tests) <- mytests) {
+    for (test <- tests) {
+      it should s"run $group ${test.binary}${test.extraName}" in {
+        CPUTesterDriver(test, "pipelined", "local") should be(true)
+      }
+    }
+  }
+}
+
+/** Just like [[SingleCycleCPUTester]], but for the pipelined CPU */
+class PipelinedBPGlobalCPUTester extends CPUFlatSpec {
+  val mytests = Map(
+    "branch" -> InstTests.branch,
+    "jump" -> InstTests.jump,
+		"applications" -> InstTests.smallApplications
+  )
+  behavior of "Pipelined CPU with global branch predictor"
+  for ((group, tests) <- mytests) {
+    for (test <- tests) {
+      it should s"run $group ${test.binary}${test.extraName}" in {
+        CPUTesterDriver(test, "pipelined", "global") should be(true)
+      }
+    }
+  }
+}
+
+class PipelinedFullApplicationTester extends CPUFlatSpec {
+  behavior of "Pipelined CPU running full applications"
+  for (test <- InstTests.fullApplications) {
+    it should s"run ${test.binary}${test.extraName}" in {
+      CPUTesterDriver(test, "pipelined") should be(true)
     }
   }
 }

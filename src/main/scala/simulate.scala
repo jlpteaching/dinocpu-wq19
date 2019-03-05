@@ -9,6 +9,7 @@ import chisel3.{ChiselExecutionFailure,ChiselExecutionSuccess,HasChiselExecution
 import net.fornwall.jelf.ElfFile
 
 import scala.collection.SortedMap
+import scala.util.control.NonFatal
 
 /**
  * Simple object with only a main function to run the treadle simulation.
@@ -106,7 +107,19 @@ object simulate {
 
     // Create the CPU config. This sets the type of CPU and the binary to load
     val conf = new CPUConfig()
-    conf.cpuType = args(1)
+
+    val params = args(1).split(":")
+    val cpuType = params(0)
+
+    val predictor =
+    if (params.length == 2) {
+      params(1)
+    } else {
+      "always-not-taken"
+    }
+
+    conf.cpuType = cpuType
+    conf.branchPredictor = predictor
     conf.memFile = hexName
 
     // This compiles the chisel to firrtl
@@ -124,11 +137,25 @@ object simulate {
 
     // This is the actual simulation
     var cycles = 0
-    val maxCycles = if (optionsManager.simulatorOptions.maxCycles > 0) optionsManager.simulatorOptions.maxCycles else 100000
+    val maxCycles = if (optionsManager.simulatorOptions.maxCycles > 0) optionsManager.simulatorOptions.maxCycles else 2000000
     // Simulate until the pc is the "endPC" or until max cycles has been reached
+    println("Running...")
     while (simulator.peek("cpu.pc") != endPC && cycles < maxCycles) {
       simulator.step(1)
       cycles += 1
+      if (cycles % 10000 == 0) {
+        println(s"Simulated $cycles cycles")
+      }
+    }
+    println(s"CYCLES: $cycles")
+    try {
+      val correct = simulator.peek("cpu.bpCorrect")
+      val incorrect = simulator.peek("cpu.bpIncorrect")
+      println(s"BP correct: $correct. incorrect: $incorrect")
+    } catch { case NonFatal(t) => }
+    println(s"Verification: ${simulator.peek("cpu.registers.regs_10")}")
+    if (simulator.peek("cpu.registers.regs_10") != 12345678) {
+      println("VERIFICATION FAILED")
     }
   }
 }
